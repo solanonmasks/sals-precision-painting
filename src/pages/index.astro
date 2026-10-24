@@ -1,0 +1,297 @@
+---
+// This is the only page on the site. The words come from src/data/content.js.
+import { Image, getImage } from 'astro:assets';
+import '../styles/global.css';
+import { CONTACT, FORM_ENDPOINT, PAIRS, SERVICES, POINTS, LOG, REVIEWS, JOBS } from '../data/content.js';
+
+// Load every photo in src/assets/sal so we can look them up by file name.
+const files = import.meta.glob('../assets/sal/*.{jpg,png}', { eager: true });
+const photo = (name) => {
+  const f = files[`../assets/sal/${name}`];
+  if (!f) throw new Error(`Photo not found: src/assets/sal/${name}`);
+  return f.default;
+};
+
+// The slider swaps photos with JavaScript, so we make the WebP versions here
+// and hand their addresses to the script.
+const slideImg = async (name) => {
+  const img = await getImage({ src: photo(name), format: 'webp', widths: [800, 1200, 1600, 2000], sizes: '(min-width: 1440px) 1344px, 100vw' });
+  return { src: img.src, srcset: img.srcSet.attribute };
+};
+const slides = await Promise.all(
+  PAIRS.map(async (p) => ({ ...p, beforeImg: await slideImg(p.before), afterImg: await slideImg(p.after) }))
+);
+const first = slides[0];
+
+const ogImage = new URL('/og-image.jpg', Astro.site ?? 'http://localhost').href;
+const pageUrl = Astro.site ? new URL('/', Astro.site).href : undefined;
+const title = 'Sal’s Precision Painting | Interior, exterior and cabinet painting';
+const description = 'Interior and exterior painting, staining and kitchen cabinet refinishing in Kelowna & surrounding areas. WCB and insured. Free quotes: (778) 251-8840.';
+
+// Business info for Google (structured data).
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HousePainter',
+  name: 'Sal’s Precision Painting',
+  telephone: '+1-778-251-8840',
+  email: CONTACT.email,
+  areaServed: 'Kelowna, BC and surrounding areas',
+  image: ogImage,
+  sameAs: [CONTACT.facebook],
+  ...(pageUrl ? { url: pageUrl } : {}),
+};
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#0E1238" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  {pageUrl && <link rel="canonical" href={pageUrl} />}
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={Astro.site ? ogImage : '/og-image.jpg'} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  {pageUrl && <meta property="og:url" content={pageUrl} />}
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="#top" class="header-logo">
+      <Image src={photo('logo-navy.png')} alt="Sal’s Precision Painting" height={60} densities={[1, 2]} format="webp" loading="eager" />
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a href="#work">Before &amp; after</a>
+      <a href="#services">Services</a>
+      <a href="#log">On the job</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href={CONTACT.phoneLink} class="btn btn-navy header-phone">{CONTACT.phoneDisplay}</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- Hero -->
+  <section class="wrap hero">
+    <div class="hero-text">
+      <div class="tags">
+        <span class="tag">WCB</span>
+        <span class="tag">Insured</span>
+        <span class="tag">References available</span>
+      </div>
+      <h1 class="display hero-title" data-reveal>Done properly.<br /><span class="grad-text">Start to finish.</span></h1>
+      <p class="hero-values" data-reveal>Clean · Efficient · Reliable · Professional</p>
+      <p class="hero-sub" data-reveal>Interior and exterior painting, staining and kitchen cabinet refinishing. Spray finishes for factory-finish results, and most projects done in 10 to 14 days.</p>
+      <div class="hero-buttons">
+        <a href="#contact" class="btn btn-blue btn-lg">Get a free quote</a>
+        <a href="#work" class="btn btn-outline btn-lg">See the work</a>
+      </div>
+    </div>
+    <div class="hero-media">
+      <div class="hero-frame">
+        <Image id="heroImg" src={photo('gambier-side.jpg')} alt="Gambier Island home restained in dark stain" widths={[800, 1200, 1600, 2048]} sizes="(min-width: 980px) 52vw, 100vw" format="webp" loading="eager" fetchpriority="high" />
+      </div>
+      <div class="hero-caption">
+        <span class="eyebrow">Gambier Island · 2026</span>
+        <span class="hero-caption-title">Full restain: house, shop, sheds and dock</span>
+      </div>
+      <div id="heroBar" class="hero-bar"></div>
+    </div>
+  </section>
+
+  <!-- Booking strip -->
+  <section class="navy">
+    <div class="wrap booking">
+      <span class="booking-title">Now booking</span>
+      <span><strong>Interior &amp; cabinets</strong> · October to March</span>
+      <span><strong>Exterior</strong> · April to September</span>
+      <span class="booking-deal">10–15% off interiors &amp; cabinet refinishing</span>
+    </div>
+  </section>
+
+  <!-- Before / after -->
+  <section id="work" class="wrap section">
+    <div class="work-head">
+      <h2 class="display h2" data-reveal>Drag to see<br />the difference.</h2>
+      {slides.length > 1 && (
+        <div class="pair-buttons">
+          {slides.map((p, i) => (
+            <button type="button" class:list={['pair-btn', { active: i === 0 }]} aria-pressed={i === 0 ? 'true' : 'false'} data-index={i}>{p.label}</button>
+          ))}
+        </div>
+      )}
+    </div>
+    <div class="ba" id="ba" data-ratio={first.ratio} role="slider" tabindex="0" aria-label="Before and after comparison" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <img class="ba-after" src={first.afterImg.src} srcset={first.afterImg.srcset} sizes="(min-width: 1440px) 1344px, 100vw" alt="After" draggable="false" loading="lazy" decoding="async" />
+      <img class="ba-before" src={first.beforeImg.src} srcset={first.beforeImg.srcset} sizes="(min-width: 1440px) 1344px, 100vw" alt="Before" draggable="false" loading="lazy" decoding="async" />
+      <div class="ba-line"></div>
+      <div class="ba-handle" aria-hidden="true">⟷</div>
+      <span class="ba-label ba-label-before">Before</span>
+      <span class="ba-label ba-label-after">After</span>
+    </div>
+    <p class="ba-caption" id="baCaption" data-ratio={first.ratio}>{first.caption}</p>
+    <script type="application/json" id="baData" set:html={JSON.stringify(slides.map((p) => ({ ratio: p.ratio, caption: p.caption, before: p.beforeImg, after: p.afterImg })))} />
+  </section>
+
+  <!-- What we do -->
+  <section id="services" class="navy">
+    <div class="wrap section">
+      <h2 class="display h2 services-title" data-reveal>What we do.</h2>
+      <div class="services-grid">
+        {SERVICES.map((s) => (
+          <div class="service" data-reveal>
+            <div class="service-img">
+              <Image src={photo(s.img)} alt={s.t} widths={[480, 720, 960]} sizes="(min-width: 980px) 33vw, (min-width: 620px) 50vw, 100vw" format="webp" />
+            </div>
+            <div class="service-body">
+              <h3>{s.t}</h3>
+              <p>{s.d}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- The prep is the job -->
+  <section class="wrap section prep">
+    <div class="prep-text">
+      <h2 class="display h2" data-reveal>The prep is<br />the job.</h2>
+      <p class="prep-sub">Clients are happy when we take the correct steps to do something properly. That means scraping, sanding, skim coating and caulking before any colour goes on.</p>
+      <div>
+        {POINTS.map((t, i) => (
+          <div class="point" data-reveal>
+            <span class="point-n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="point-t">{t}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div class="prep-photos">
+      <div class="prep-photo" data-reveal>
+        <Image src={photo('feature-wall.jpg')} alt="Feature wall sanded, recut and rolled smooth" widths={[400, 700, 1000]} sizes="(min-width: 980px) 25vw, 50vw" format="webp" />
+      </div>
+      <div class="prep-photo prep-photo-low" data-reveal>
+        <Image src={photo('bedroom-light.jpg')} alt="Freshly painted bedroom" widths={[400, 700, 1000]} sizes="(min-width: 980px) 25vw, 50vw" format="webp" />
+      </div>
+    </div>
+  </section>
+
+  <!-- On the job -->
+  <section id="log" class="alt">
+    <div class="wrap section log">
+      <div class="log-intro">
+        <h2 class="display h2" data-reveal>On the job.</h2>
+        <p>Straight from our Facebook page. What got done, and what’s next.</p>
+        <a href={CONTACT.facebook} target="_blank" rel="noopener" class="fb-link">Follow on Facebook</a>
+      </div>
+      <div>
+        {LOG.map((l) => (
+          <div class="entry" data-reveal>
+            <span class="entry-date">{l.d}</span>
+            <div class="entry-text">
+              <h3>{l.t}</h3>
+              <p>{l.b}</p>
+            </div>
+            <div class="entry-img">
+              <Image src={photo(l.img)} alt={l.t} widths={[400, 600, 900]} sizes="(min-width: 760px) 200px, 100vw" format="webp" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section id="reviews" class="wrap section">
+    <div class="reviews-head">
+      <h2 class="display h2" data-reveal>What clients<br />say about Carter.</h2>
+      <div class="rating" data-reveal>
+        <span class="rating-num">5.0</span>
+        <div class="rating-side">
+          <span class="rating-stars grad-text-alt" aria-label="5 out of 5 stars">★★★★★</span>
+          <span class="rating-label">Rated on Google</span>
+        </div>
+      </div>
+    </div>
+    <div class="reviews">
+      {REVIEWS.map((r) => (
+        <figure class="review" data-reveal style={`border-top-color:${r.c}`}>
+          <span class="review-stars" aria-label="5 out of 5 stars">★★★★★</span>
+          <blockquote>“{r.q}”</blockquote>
+          <figcaption><span class="review-name">{r.n}</span><span class="review-what">{r.w}</span></figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="navy">
+    <div class="wrap section contact">
+      <div class="contact-info">
+        <h2 class="display contact-title" data-reveal>Get your<br /><span class="grad-text-alt">free quote.</span></h2>
+        <p class="contact-sub">Tell Carter what needs painting. Interior, exterior, cabinets, fences or decks.</p>
+        <a href={CONTACT.phoneLink} class="contact-phone">{CONTACT.phoneDisplay}</a>
+        <a href={`mailto:${CONTACT.email}`} class="contact-email">{CONTACT.email}</a>
+        <p class="contact-area">Serving {CONTACT.area}</p>
+      </div>
+      <div>
+        <form id="quoteForm" class="quote-form" data-endpoint={FORM_ENDPOINT} data-email={CONTACT.email} novalidate>
+          <div class="form-row">
+            <label>Name<input name="name" required autocomplete="name" /></label>
+            <label>Phone<input name="phone" required type="tel" autocomplete="tel" /></label>
+          </div>
+          <label>Email<input name="email" type="email" autocomplete="email" /></label>
+          <div class="chips-wrap">
+            <span class="chips-label" id="jobsLabel">What needs painting?</span>
+            <div class="chips" role="group" aria-labelledby="jobsLabel">
+              {JOBS.map((j) => (
+                <button type="button" class="chip" aria-pressed="false" data-job={j}>{j}</button>
+              ))}
+            </div>
+          </div>
+          <label>Details<textarea name="details" rows="4" placeholder="Rooms, square footage, timing"></textarea></label>
+          <p class="form-error" id="formError" role="alert" hidden></p>
+          <button type="submit" class="btn btn-blue submit-btn">Request my quote</button>
+        </form>
+        <p class="form-thanks" id="formThanks" hidden tabindex="-1">Thanks. We’ll be in touch about your quote.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="mobile-bar">
+  <a href={CONTACT.phoneLink} class="mobile-call">Call</a>
+  <a href="#contact" class="mobile-quote">Free quote</a>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span class="footer-brand">
+      <Image src={photo('logo-white.png')} alt="Sal’s Precision Painting" height={52} densities={[1, 2]} format="webp" />
+      © {year}
+    </span>
+    <span>WCB · Insured · Free quotes</span>
+    <span>Powered by <a href="https://backpackdigitalmedia.com" target="_blank" rel="noopener">Backpack Digital Media</a></span>
+  </div>
+</footer>
+</div>
+
+<script src="../scripts/site.js"></script>
+</body>
+</html>
