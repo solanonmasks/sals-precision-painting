@@ -201,6 +201,28 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
 .mobile-call { background: var(--navy); }
 .mobile-quote { background: linear-gradient(90deg, #3B5BFF, #7B4DFF); }
 
+/* ---------- Phone & tablet hero (under 980px) ---------- */
+/* Order on phones: tags, headline, photo, then the text and buttons. */
+@media (max-width: 979px) {
+  .header-inner { height: 72px; }
+  .header-logo img { height: 48px; }
+  .header-phone { font-size: 15px; padding: 11px 14px; }
+
+  .hero { padding-top: 28px; padding-bottom: 48px; gap: 0; }
+  .hero-text { display: contents; }
+  .tags { order: 1; gap: 6px; margin-bottom: 18px; }
+  .tag { font-size: 12px; padding: 6px 10px; }
+  .hero-title { order: 2; font-size: clamp(42px, 11.5vw, 72px); margin-bottom: 24px; }
+  .hero-media { order: 3; margin: 0 calc(var(--gutter) * -1) 28px; }
+  .hero-values { order: 4; font-size: 15px; margin-bottom: 12px; }
+  .hero-sub { order: 5; font-size: 17px; margin-bottom: 24px; }
+  .hero-buttons { order: 6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hero-buttons .btn { text-align: center; font-size: 16px; padding: 16px 10px; }
+  .hero-buttons .btn-outline { padding: 14px 8px; }
+  .hero-caption { left: 0; bottom: 0; padding: 12px 16px; }
+  .hero-caption-title { font-size: 16px; }
+}
+
 /* ---------- Wide screens (980px and up) ---------- */
 @media (min-width: 980px) {
   .main-nav { display: flex; }
